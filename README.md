@@ -3,6 +3,8 @@
 This completed demonstration generates a data-driven static site from a spreadsheet, validates the content, and deploys it through GitHub Actions. It illustrates practical programmatic SEO engineering.
 Kestrel eCampus is fictional. Every fee, date and requirement is made up. Nothing here is client data.
 
+[Read the implementation case study](CASE_STUDY.md) for architecture, reproducible validation steps and evidence boundaries.
+
 ## What is in this folder
 
 | File | What it is |
