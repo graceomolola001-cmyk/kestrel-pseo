@@ -1,6 +1,6 @@
 # Kestrel eCampus: programmatic SEO practice project
 
-You will build a small, real programmatic site from a spreadsheet, check it, and (optionally) put it online.
+This completed demonstration generates a data-driven static site from a spreadsheet, validates the content, and deploys it through GitHub Actions. It illustrates practical programmatic SEO engineering.
 Kestrel eCampus is fictional. Every fee, date and requirement is made up. Nothing here is client data.
 
 ## What is in this folder
@@ -12,12 +12,12 @@ Kestrel eCampus is fictional. Every fee, date and requirement is made up. Nothin
 | `pseo_checker.py` | Checks the dataset (blanks, formats, copies, stale dates). |
 | `build.py` | Turns the dataset into pages in `dist/`. |
 | `qa.py` | Checks the built pages (titles, links, canonicals, duplicates). |
-| `ANSWER_KEY.md` | **Do not open until you finish Step 1.** |
 
-You need Python 3.8 or newer. Nothing else to install. Open this folder in Cursor and use its terminal.
+
+You need Python 3.8 or newer. Nothing else to install. Open the repository in your preferred editor and use its terminal.
 On Windows, `python` or `py` both work.
 
-## The steps
+## Reproduce the workflow
 
 ### Step 1: check the dataset
 ```
@@ -51,7 +51,7 @@ Then break something on purpose (for example, change one canonical link in a bui
 ### Step 5: put it online
 Upload the `dist/` folder to a free static host (for example Cloudflare Pages direct upload). By default the site is `noindex` and blocks crawlers, which is right for a demo with made-up facts.
 
-### Step 6: write it up
+### Step 6: document the results
 A one-page case study: the goal, the three parts, what the checker found, what only the source could catch, what you held back and why, and the QA results.
 
 ## Deploy to GitHub Pages
