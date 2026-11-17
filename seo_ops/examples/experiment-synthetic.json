@@ -1,0 +1,13 @@
+{
+  "sample_dataset": "SYNTHETIC DEMONSTRATION; NOT A REAL EXPERIMENT",
+  "hypothesis": "A clearer organic landing-page CTA increases signup conversion rate",
+  "pre_registered": false,
+  "baseline_rate": 0.04,
+  "relative_mde": 0.2,
+  "power": 0.8,
+  "alpha": 0.05,
+  "control_visitors": 200,
+  "control_conversions": 9,
+  "variant_visitors": 200,
+  "variant_conversions": 12
+}
