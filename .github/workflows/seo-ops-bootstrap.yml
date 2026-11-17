@@ -16,10 +16,10 @@ jobs:
       - name: Expand checked-in source package
         run: |
           python - <<'PY'
-          import base64, gzip, json
+          import base64, lzma, json
           from pathlib import Path
           package = Path('seo_ops_bundle.b64')
-          contents = json.loads(gzip.decompress(base64.b64decode(package.read_text())).decode('utf-8'))
+          contents = json.loads(lzma.decompress(base64.b64decode(package.read_text())).decode('utf-8'))
           for name, body in contents.items():
               path = Path(name)
               if '..' in path.parts or path.is_absolute() or not (
