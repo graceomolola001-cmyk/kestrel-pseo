@@ -2,7 +2,7 @@ name: Install SEO Ops package
 
 on:
   push:
-    paths: ['seo_ops_bundle.b64']
+    paths: ['seo_ops_bundle.b64', '.github/workflows/seo-ops-bootstrap.yml']
   workflow_dispatch:
 
 permissions:
@@ -22,6 +22,8 @@ jobs:
           encoded = ''.join(Path('seo_ops_bundle.part' + str(i)).read_text() for i in range(1, 4)) + package.read_text()
           contents = json.loads(lzma.decompress(base64.b64decode(encoded)).decode('utf-8'))
           for name, body in contents.items():
+              if not name.startswith('seo_ops/'):
+                  continue
               path = Path(name)
               if '..' in path.parts or path.is_absolute() or not (
                   name.startswith('seo_ops/') or name in (
