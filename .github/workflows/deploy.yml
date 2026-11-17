@@ -24,6 +24,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Run SEO Ops tests
+        run: python -m unittest discover -s seo_ops/tests -v
+
       - name: Check the dataset
         run: python pseo_checker.py data/pages.csv
 
@@ -37,11 +40,19 @@ jobs:
           else
             BASE="https://${OWNER}.github.io/${REPO}"
           fi
-          echo "Base URL: $BASE"
+          echo "BASE=$BASE" >> "$GITHUB_ENV"
           python build.py --base-url "$BASE"
 
       - name: QA the built pages
         run: python qa.py dist
+
+      - name: Automate schema and SEO release checks
+        run: |
+          python -m seo_ops.cli audit-dir dist \
+            --base-url "$BASE" \
+            --out dist/seo-health.json \
+            --html dist/seo-health.html --strict
+          python -m seo_ops.cli redirects seo_ops/redirects.csv --strict
 
       - uses: actions/upload-pages-artifact@v4
         with:
