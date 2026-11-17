@@ -1,0 +1,38 @@
+name: SEO Ops live monitoring
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 7 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Run automated tests
+        run: python -m unittest discover -s seo_ops/tests -v
+      - name: Crawl published site with SEO checks
+        env:
+          SEO_OPS_WEBHOOK_URL: ${{ secrets.SEO_OPS_WEBHOOK_URL }}
+        run: |
+          python -m seo_ops.cli crawl \
+            --url 'https://graceomolola001-cmyk.github.io/kestrel-pseo/' \
+            --max-pages 30 --delay 0.4 \
+            --out reports/live-audit.json --html reports/live-audit.html \
+            --strict --notify
+      - name: Upload audit artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: seo-ops-live-audit
+          path: reports/
+          if-no-files-found: warn
+          retention-days: 14
