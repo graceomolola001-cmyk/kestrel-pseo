@@ -19,7 +19,8 @@ jobs:
           import base64, lzma, json
           from pathlib import Path
           package = Path('seo_ops_bundle.b64')
-          contents = json.loads(lzma.decompress(base64.b64decode(package.read_text())).decode('utf-8'))
+          encoded = ''.join(Path('seo_ops_bundle.part' + str(i)).read_text() for i in range(1, 4)) + package.read_text()
+          contents = json.loads(lzma.decompress(base64.b64decode(encoded)).decode('utf-8'))
           for name, body in contents.items():
               path = Path(name)
               if '..' in path.parts or path.is_absolute() or not (
@@ -32,6 +33,8 @@ jobs:
               path.parent.mkdir(parents=True, exist_ok=True)
               path.write_text(body, encoding='utf-8')
           package.unlink()
+          for i in range(1, 4):
+              Path('seo_ops_bundle.part' + str(i)).unlink()
           print('Installed', len(contents), 'source files')
           PY
           python -m unittest discover -s seo_ops/tests -v
