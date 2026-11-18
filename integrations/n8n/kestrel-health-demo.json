@@ -1,0 +1,161 @@
+{
+  "name": "Kestrel SEO Health - Local Interview Demo",
+  "nodes": [
+    {
+      "id": "9d2e8f1f-8888-4444-aaaa-000000000001",
+      "name": "Run interview demo",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        240,
+        300
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "9d2e8f1f-8888-4444-aaaa-000000000002",
+      "name": "Fetch published SEO audit",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        470,
+        300
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "https://graceomolola001-cmyk.github.io/kestrel-pseo/seo-health.json",
+        "options": {}
+      }
+    },
+    {
+      "id": "9d2e8f1f-8888-4444-aaaa-000000000003",
+      "name": "Validate and classify",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        700,
+        300
+      ],
+      "parameters": {
+        "mode": "runOnceForAllItems",
+        "jsCode": "const report = $input.first().json;\nif (!report || typeof report !== 'object') throw new Error('The HTTP response is not a JSON audit');\nif (!report.counts || !Number.isFinite(Number(report.counts.error))) {\n  throw new Error('Missing expected audit counts: check the published report URL');\n}\nconst errors = Number(report.counts.error);\nconst warnings = Number(report.counts.warning || 0);\nconst pagesChecked = Number(report.pages_checked || 0);\nreturn [{\n  json: {\n    project: 'Kestrel SEO Operations Lab',\n    source: 'Published GitHub Pages audit',\n    audited_at: report.created_at || 'unknown',\n    audited_url: report.target || '',\n    pages_checked: pagesChecked,\n    errors,\n    warnings,\n    requires_attention: errors > 0,\n    recommendation: errors > 0\n      ? 'Review the reported URLs and investigate before release.'\n      : 'No critical issues in checked scope. Verify coverage separately.',\n    issue_sample: (report.findings || []).filter(x => x.severity === 'error').slice(0, 5)\n  }\n}];"
+      }
+    },
+    {
+      "id": "9d2e8f1f-8888-4444-aaaa-000000000004",
+      "name": "Critical SEO issues?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        930,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9d2e8f1f-9999-4444-bbbb-000000000001",
+              "leftValue": "={{ $json.errors }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "9d2e8f1f-8888-4444-aaaa-000000000005",
+      "name": "Needs SEO review",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1170,
+        200
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "9d2e8f1f-8888-4444-aaaa-000000000006",
+      "name": "No critical findings",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        1170,
+        400
+      ],
+      "parameters": {}
+    }
+  ],
+  "connections": {
+    "Run interview demo": {
+      "main": [
+        [
+          {
+            "node": "Fetch published SEO audit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch published SEO audit": {
+      "main": [
+        [
+          {
+            "node": "Validate and classify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate and classify": {
+      "main": [
+        [
+          {
+            "node": "Critical SEO issues?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Critical SEO issues?": {
+      "main": [
+        [
+          {
+            "node": "Needs SEO review",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No critical findings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "active": false,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
