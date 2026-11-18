@@ -81,22 +81,22 @@
         path:"/programmes/online-mba-ghana/",
         code:'<meta name="robots" content="noindex">',
         level:"CRITICAL · INDEXABILITY",
-        title:"An important page is excluded",
-        explanation:"A crawler can flag an unexpected noindex directive when the approved baseline expects this page to be indexable. Verify the intended publishing state before alerting engineering."
+        title:"A page is hidden from search",
+        explanation:"This page tells search engines to leave it out of search results. Check whether that was planned. If it was a mistake, ask the site team to remove the tag."
       },
       canonical:{
         path:"/programmes/online-mba-ghana/",
         code:'<link rel="canonical" href="https://example.org/unrelated-course/">',
         level:"ERROR · CANONICAL",
-        title:"Canonical destination does not match",
-        explanation:"Compare the canonical target with the approved URL map and page content. A mismatched canonical may cause search engines to prefer another address."
+        title:"The page points to the wrong URL",
+        explanation:"The page points search engines to the wrong main URL. Check the correct page address and fix the link in the page code."
       },
       link:{
         path:"/programmes/online-marketing-nigeria/",
         code:'<a href="/programmes/removed-page/">Explore the course</a>\nHTTP/1.1 404 Not Found',
         level:"ERROR · BROKEN LINK",
-        title:"Internal navigation leads to a 404",
-        explanation:"An automated crawl can identify broken destinations. Resolve by updating the link, restoring the intended page or redirecting to a genuinely equivalent destination."
+        title:"A link leads to a missing page",
+        explanation:"This link leads to a missing page. Fix the link or send people to a page that covers the same topic."
       }
     };
     const tabs=Array.from(document.querySelectorAll("[data-scenario]"));
