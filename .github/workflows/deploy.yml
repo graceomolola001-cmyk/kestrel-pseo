@@ -26,6 +26,9 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Verify interactive JavaScript syntax
+        run: node --check site_assets/site.js
+
       - name: Run SEO Ops tests
         run: python -m unittest discover -s seo_ops/tests -v
 
