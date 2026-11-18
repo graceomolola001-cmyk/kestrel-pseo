@@ -5,9 +5,9 @@
 This guide is for **API authentication**, so Python and local n8n can fetch the data using authorized Google credentials.
 
 ## Public Kestrel identifiers
-- GA4 web Measurement ID: \`G-K3E3Z1C089\` (browser tracking)
-- GA4 numeric Property ID: \`565038230\` (Data API)
-- Search Console URL-prefix property: \`https://graceomolola001-cmyk.github.io/kestrel-pseo/\` (Search Console API)
+- GA4 web Measurement ID: `G-K3E3Z1C089` (browser tracking)
+- GA4 numeric Property ID: `565038230` (Data API)
+- Search Console URL-prefix property: `https://graceomolola001-cmyk.github.io/kestrel-pseo/` (Search Console API)
 
 ## Part 1. Google Cloud project and APIs
 
@@ -18,7 +18,7 @@ This guide is for **API authentication**, so Python and local n8n can fetch the 
    https://console.cloud.google.com/apis/library/searchconsole.googleapis.com
 4. Open **IAM & Admin → Service Accounts**:
    https://console.cloud.google.com/iam-admin/serviceaccounts
-5. Create a service account named \`kestrel-seo-reader\`. Note the generated email, ending with \`.iam.gserviceaccount.com\`.
+5. Create a service account named `kestrel-seo-reader`. Note the generated email, ending with `.iam.gserviceaccount.com`.
 6. For this read-only exercise, no broad Google Cloud IAM project role is required for property data access. Grant access **inside GA4 and Search Console** as described next.
 
 ## Part 2. Give the service account limited access
@@ -35,8 +35,8 @@ If Google refuses a service-account address in a particular interface, stop and 
 For local automation you can create a service-account JSON key from **Google Cloud → IAM & Admin → Service Accounts → Keys → Add key → Create new key → JSON**, if permitted.
 
 - Treat that JSON file as a password. **Never upload or paste it into GitHub, ChatGPT, or a public folder.**
-- Keep it outside the repository, e.g. \`C:\Users\<your-Windows-user>\.kestrel-private\google-reader.json\`.
-- Project files ignore common \`.env\`, credentials folders and local report outputs, but storing secrets outside the repo is safer.
+- Keep it outside the repository, e.g. `C:\Users\<your-Windows-user>\.kestrel-private\google-reader.json`.
+- Project files ignore common `.env`, credentials folders and local report outputs, but storing secrets outside the repo is safer.
 - If key creation is disabled, follow an OAuth/identity-based method instead.
 
 In PowerShell, from your local Kestrel repository:
@@ -64,17 +64,17 @@ Search Console may return **zero search rows** because fictional pages are inten
 python -m seo_ops.cli google-pull --ga4-property 565038230 --gsc-property "https://graceomolola001-cmyk.github.io/kestrel-pseo/" --output-dir reports
 ~~~
 
-The code creates \`reports/ga4-daily.csv\` and \`reports/gsc-pages.csv\`. These CSVs should be treated as private working files, **not** pushed to GitHub.
+The code creates `reports/ga4-daily.csv` and `reports/gsc-pages.csv`. These CSVs should be treated as private working files, **not** pushed to GitHub.
 
 ## Part 5. n8n local (after APIs pass)
 
 n8n supports a Google Service Account credential for HTTP Request nodes. Enable its **Set up for use in HTTP Request node** option and use the same read-only Google API scopes:
-- \`https://www.googleapis.com/auth/analytics.readonly\`
-- \`https://www.googleapis.com/auth/webmasters.readonly\`
+- `https://www.googleapis.com/auth/analytics.readonly`
+- `https://www.googleapis.com/auth/webmasters.readonly`
 
 The two APIs can be called through HTTP Request nodes:
-- POST \`https://analyticsdata.googleapis.com/v1beta/properties/565038230:runReport\`
-- POST \`https://www.googleapis.com/webmasters/v3/sites/{URL-ENCODED-KESTREL-GSC-PROPERTY}/searchAnalytics/query\`
+- POST `https://analyticsdata.googleapis.com/v1beta/properties/565038230:runReport`
+- POST `https://www.googleapis.com/webmasters/v3/sites/{URL-ENCODED-KESTREL-GSC-PROPERTY}/searchAnalytics/query`
 
 Add Code/IF nodes to compare counts, label empty responses, and send a summary. Store credentials using **n8n Credentials**, never inline in shared workflow JSON.
 
