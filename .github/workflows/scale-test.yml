@@ -1,0 +1,28 @@
+name: Synthetic pSEO 500-page scale test
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scale-500:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+      - name: Generate and test 500 fictional pages, locally in CI
+        run: python -m seo_ops.scale_test --count 500 --out reports/scale-test
+      - name: Upload private-run test artifacts (not public website)
+        uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-500-page-test-evidence
+          path: |
+            reports/scale-test/summary.json
+            reports/scale-test/seo-audit.json
+            reports/scale-test/generated-records.csv
+          if-no-files-found: error
