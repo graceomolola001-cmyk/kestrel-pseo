@@ -143,38 +143,38 @@ def page(r, pub, base, noindex, faq_schema):
                                 "acceptedAnswer": {"@type": "Answer", "text": a}} for q, a in qa]}
         ld = f'<script type="application/ld+json">{json.dumps(data, ensure_ascii=False)}</script>'
     body = f"""<div class="detail-intro" data-reveal>
-<div class="eyebrow section-index">DATA RECORD / FICTIONAL PROGRAMME</div>
+<div class="eyebrow section-index">SAMPLE COURSE / MADE-UP DATA</div>
 <nav class="crumbs" aria-label="Breadcrumb"><a href="{PREFIX}/">Home</a> / <a href="{PREFIX}/programmes/">Catalogue</a> / {esc(n)}</nav>
 <h1>{esc(n)}</h1>
-<p class="hero-lede">A generated programme profile for {esc(r["country"])}. Fees, dates and admissions details are entirely fictional and used only to demonstrate the SEO publishing workflow.</p>
+<p class="hero-lede">A sample course page for {esc(r["country"])}. The fees, dates, and entry rules are made up. This page helps show how the website tools work.</p>
 </div>
 <div class="detail-cols">
 <article class="detail-main" data-reveal>
-<div class="eyebrow section-index">01 / STRUCTURED SOURCE</div>
-<h2>Programme facts</h2>
+<div class="eyebrow section-index">01 / COURSE DETAILS</div>
+<h2>Course details</h2>
 <dl class="facts">
 <dt>Fees</dt><dd data-field="fees">{esc(r['fees'])}</dd>
 <dt>Duration</dt><dd data-field="duration">{esc(r['duration'])}</dd>
 <dt>Next intake</dt><dd data-field="intake">{esc(r['intake'])}</dd>
 <dt>Entry requirements</dt><dd data-field="entry">{esc(r['entry'])}</dd>
 </dl>
-<p class="meta">Illustrative source: {esc(r['source'])}. Example verification date: {esc(r['last_verified'])}.</p>
-<div class="eyebrow section-index" style="margin-top:52px">02 / AUDIENCE INTENT</div>
-<h2>Who this page is written for</h2>
+<p class="meta">Sample source: {esc(r['source'])}. Sample check date: {esc(r['last_verified'])}.</p>
+<div class="eyebrow section-index" style="margin-top:52px">02 / WHO IT IS FOR</div>
+<h2>Who this course may suit</h2>
 <p data-field="suits">{esc(r['suits'])}</p>
-<div class="eyebrow section-index" style="margin-top:48px">03 / INFORMATION ARCHITECTURE</div>
+<div class="eyebrow section-index" style="margin-top:48px">03 / USEFUL LINKS</div>
 <h2>Common questions</h2>
 <div>{qa_html}</div>
-<h2>Related programme pages</h2>
+<h2>Related course pages</h2>
 {related(r, pub)}
-<a class="cta" href="{PREFIX}/programmes/">Back to catalogue ↗</a>
+<a class="cta" href="{PREFIX}/programmes/">Back to course list ↗</a>
 </article>
 <aside class="side-note" data-reveal>
-<div class="eyebrow">THE ENGINEERING BEHIND THIS PAGE</div>
-<h3>One template. Structured facts. Repeatable checks.</h3>
-<p>Python renders this page from a source record. Pre-release checks inspect metadata, canonical signals, internal navigation and schema where configured.</p>
-<p>These fictional records are marked noindex by design, and page-level metadata is available for inspection.</p>
-<a class="board-link" href="https://github.com/graceomolola001-cmyk/kestrel-pseo/blob/main/build.py">Inspect the generator ↗</a>
+<div class="eyebrow">HOW THIS PAGE WAS MADE</div>
+<h3>One layout. Many course pages.</h3>
+<p>Python builds this page from a row in a table. Before it goes live, Kestrel checks its title, links, and SEO tags.</p>
+<p>This sample page has a noindex tag. That tells Google not to show it in search results.</p>
+<a class="board-link" href="https://github.com/graceomolola001-cmyk/kestrel-pseo/blob/main/build.py">See the Python code ↗</a>
 </aside>
 </div>
 {ld}"""
