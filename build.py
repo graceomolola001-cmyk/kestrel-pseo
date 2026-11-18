@@ -365,10 +365,16 @@ def main():
         urls = "".join(
             f"<url><loc>{esc(a.base_url.rstrip('/') + path_for(r))}</loc>"
             f"<lastmod>{esc(r['last_verified'])}</lastmod></url>" for r in pub)
+        # Add the standalone section URLs when building a real, approved site.
+        core_paths = ["/programmes/"] + list(site_documents.keys())
+        urls += "".join(
+            f"<url><loc>{esc(a.base_url.rstrip('/') + path)}</loc></url>"
+            for path in core_paths
+        )
         write("/sitemap.xml", '<?xml version="1.0" encoding="UTF-8"?>\n'
               '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + urls + "</urlset>\n")
 
-    print(f"Built {len(pub)} pages into {a.out}/  ({len(held)} held back)")
+    print(f"Built {len(pub)} programme pages + {len(site_documents) + 1} main pages into {a.out}/ ({len(held)} held back)")
     print("Mode: " + ("INDEXABLE with sitemap.xml" if not noindex else "noindex (safe for a demo)"))
     if reviews:
         print(f"{len(reviews)} REVIEW items remain. Confirm each against its source:")
