@@ -116,8 +116,10 @@ def run(count=500, output="reports/scale-test"):
     first_page = next((site_dir / "programmes").glob("*/index.html"))
     first_html = first_page.read_text(encoding="utf-8")
     # This single test asks what happens if a noindex page were expected to be indexable.
-    injected, _ = audit_html(first_html, BASE + "/programmes/test-page/",
-                             expect_indexable=True)
+    canonical_tag = '<link rel="canonical" href="'
+    canonical_start = first_html.index(canonical_tag) + len(canonical_tag)
+    actual_canonical = first_html[canonical_start:first_html.index('"', canonical_start)]
+    injected, _ = audit_html(first_html, actual_canonical, expect_indexable=True)
     codes = [x.code for x in injected]
     if "UNEXPECTED_NOINDEX" not in codes:
         raise RuntimeError("Expected the injected indexability failure to be detected")
