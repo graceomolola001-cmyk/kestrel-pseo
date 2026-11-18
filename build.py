@@ -246,7 +246,7 @@ def hub(pub, base, noindex, home=False):
 <div><strong data-audit-errors>…</strong><span>Errors reported</span></div></div>
 <p class="board-status" data-audit-status role="status">Reading the published audit…</p>
 <p class="board-status" data-audit-footnote></p>
-<a class="board-link" href="{PREFIX}/seo-health.html">Open the audit evidence ↗</a>
+<a class="board-link" href="{base.rstrip('/')}/seo-health.html">Open the audit evidence ↗</a>
 </div>
 </aside>
 </section>
