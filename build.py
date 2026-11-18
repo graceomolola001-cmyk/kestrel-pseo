@@ -269,13 +269,31 @@ def hub(pub, base, noindex, home=False):
 <a class="route-card" href="{PREFIX}/lab/"><small>02 / TRY IT</small><b>Can you spot the error?</b><span>Try three real kinds of SEO mistakes in a safe demo.</span><small>OPEN THE LAB ↗</small></a>
 <a class="route-card" href="{PREFIX}/reports/"><small>03 / THE PROOF</small><b>What did the checks find?</b><span>See the results from the site's latest build.</span><small>VIEW REPORTS ↗</small></a>
 </div></section>"""
-        body = hero + routes
+        body = hero + f"""
+<section class="editorial-photo-story" aria-label="The people and work behind digital projects" data-reveal>
+  <figure class="photo-story-main">
+    <img src="https://images.unsplash.com/photo-1768219565623-501f93ae384b?auto=format&fit=crop&w=950&q=76" width="670" height="1000" alt="A laptop and open notebook on a warmly lit desk" loading="lazy" decoding="async">
+    <figcaption>Workspaces are where good systems begin. <span>Illustrative photo · <a href="https://unsplash.com/photos/laptop-notebook-and-coffee-on-a-desk-srrvlsaB2P4">Lau Clrd / Unsplash</a></span></figcaption>
+  </figure>
+  <div class="photo-story-copy">
+    <div class="eyebrow section-index">A CLOSER LOOK / THE WORK</div>
+    <h2>Better pages start with <em>better habits.</em></h2>
+    <p>What if a small error reaches 100 pages at once? Kestrel checks the details before they reach the website.</p>
+    <p>The same rules work for one page or hundreds. You can see the checks, the code and the results.</p>
+    <a class="text-arrow" href="{PREFIX}/systems/">See how the checks work ↗</a>
+    <div class="editorial-image-index"><span>01 / START WITH THE SOURCE</span><span>02 / CHECK BEFORE RELEASE</span></div>
+  </div>
+</section>""" + routes
     else:
         title = f"Programme catalogue | {SITE} SEO lab"
         desc = "Explore sample course pages made by Python and checked for SEO mistakes."
         canonical = base.rstrip("/") + "/programmes/"
         lead = """<section class="collection-head" data-reveal><div><div class="eyebrow section-index">INDEX / GENERATED PAGES</div>
-<h1>The course page library.</h1></div><p>These sample course pages come from one table. Search or choose a country to see how Python builds different pages from the same layout.</p></section>"""
+<h1>The course page library.</h1></div><p>These sample course pages come from one table. Search or choose a country to see how Python builds different pages from the same layout.</p></section>
+<figure class="catalogue-cover-photo" data-reveal>
+<img src="https://images.unsplash.com/photo-1758611974775-39e307bc3da9?auto=format&fit=crop&w=1100&q=76" width="1000" height="562" alt="A woman working at a laptop with a notebook beside her" loading="lazy" decoding="async">
+<figcaption>Photo for illustration · <a href="https://unsplash.com/photos/young-woman-working-on-a-laptop-at-home-WrevB3gLLBs">Vitaly Gariev / Unsplash</a>. This is a fictional course library.</figcaption>
+</figure>"""
         body = lead + catalogue
     return head(title, desc, canonical, noindex) + body + FOOT.replace("{PREFIX}", PREFIX)
 
@@ -337,6 +355,10 @@ def section_page(section, base, noindex, pub):
 <div class="eyebrow section-index">01 / HOW IT WORKS</div>
 <h1>From a table<br>to a <em>tested website.</em></h1>
 <p class="hero-lede">Kestrel starts with a table. Python makes the pages. Then tests look for mistakes before the site goes live. Here's how each part works.</p></section>
+<figure class="systems-photo" data-reveal>
+  <img src="https://images.unsplash.com/photo-1756946565798-382eb6bfeda2?auto=format&fit=crop&w=1000&q=76" width="1000" height="666" alt="Laptop showing a code editor on a work desk" loading="lazy" decoding="async">
+  <figcaption>The code in this picture is illustrative. <a href="https://unsplash.com/photos/laptop-displaying-code-on-a-desk-dTmj5aXbKp4">Photo: Dawit / Unsplash</a>. <a href="https://github.com/graceomolola001-cmyk/kestrel-pseo">See Kestrel's real code ↗</a></figcaption>
+</figure>
 <section class="page-guide" data-reveal><div class="eyebrow">FOUR SIMPLE STEPS</div>
 <ol class="process-list">
 <li><div><strong>Collect the page details</strong><p>A CSV is like a spreadsheet. It holds each course name, country, fee, and start date. Kestrel checks every row before it builds a page.</p></div></li>
