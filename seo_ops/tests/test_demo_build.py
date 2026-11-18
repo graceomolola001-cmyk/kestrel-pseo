@@ -1,5 +1,6 @@
 """Regression tests for the public fictional demo build."""
 from pathlib import Path
+import os
 import subprocess
 import sys
 import tempfile
@@ -26,6 +27,38 @@ class DemoBuildTests(unittest.TestCase):
             self.assertIn("Allow: /", robots)
             self.assertNotIn("Disallow: /", robots)
             self.assertFalse((Path(folder) / "sitemap.xml").exists())
+
+
+    def test_optional_google_tag_and_gsc_verification(self):
+        with tempfile.TemporaryDirectory() as folder:
+            env = os.environ.copy()
+            env["KESTREL_GA4_MEASUREMENT_ID"] = "G-TEST123456"
+            env["KESTREL_GSC_VERIFICATION_TOKEN"] = "testverification123_xyz"
+            run = subprocess.run(
+                [sys.executable, str(ROOT / "build.py"),
+                 "--out", folder, "--base-url", BASE],
+                cwd=ROOT, env=env, capture_output=True, text=True, check=False
+            )
+            self.assertEqual(run.returncode, 0, run.stdout + run.stderr)
+            home = (Path(folder) / "index.html").read_text(encoding="utf-8")
+            self.assertIn('name="google-site-verification"', home)
+            self.assertIn('content="testverification123_xyz"', home)
+            self.assertIn('googletagmanager.com/gtag/js?id=G-TEST123456', home)
+            self.assertIn("gtag('config', \"G-TEST123456\")", home)
+            self.assertIn('content="noindex, nofollow"', home)
+
+    def test_invalid_measurement_id_blocks_build(self):
+        with tempfile.TemporaryDirectory() as folder:
+            env = os.environ.copy()
+            env["KESTREL_GA4_MEASUREMENT_ID"] = "<script>alert(1)</script>"
+            env.pop("KESTREL_GSC_VERIFICATION_TOKEN", None)
+            run = subprocess.run(
+                [sys.executable, str(ROOT / "build.py"),
+                 "--out", folder, "--base-url", BASE],
+                cwd=ROOT, env=env, capture_output=True, text=True, check=False
+            )
+            self.assertNotEqual(run.returncode, 0)
+            self.assertFalse((Path(folder) / "index.html").exists())
 
 if __name__ == "__main__":
     unittest.main()
