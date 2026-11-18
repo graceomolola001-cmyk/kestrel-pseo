@@ -178,7 +178,7 @@ def page(r, pub, base, noindex, faq_schema):
 </aside>
 </div>
 {ld}"""
-    return head(title, meta_description(r), canonical, noindex) + body + FOOT
+    return head(title, meta_description(r), canonical, noindex) + body + FOOT.replace("{PREFIX}", PREFIX)
 
 def hub(pub, base, noindex, home=False):
     progs = list(dict.fromkeys(r["programme"] for r in pub))
@@ -277,7 +277,7 @@ def hub(pub, base, noindex, home=False):
         lead = """<section class="collection-head" data-reveal><div><div class="eyebrow section-index">INDEX / GENERATED PAGES</div>
 <h1>The page library.</h1></div><p>Fictional programme records, generated from a shared template. Use the filters to explore how one validated dataset becomes a linked page collection.</p></section>"""
         body = lead + catalogue
-    return head(title, desc, canonical, noindex) + body + FOOT
+    return head(title, desc, canonical, noindex) + body + FOOT.replace("{PREFIX}", PREFIX)
 
 def section_page(section, base, noindex, pub):
     """Standalone sections with their own URLs, canonicals and page copy."""
@@ -291,6 +291,47 @@ def section_page(section, base, noindex, pub):
     }
     title, desc = titles[section]
     canonical = base.rstrip("/") + f"/{section}/"
+    experiment = """<section class="experiment" id="diagnostics" aria-label="Interactive technical SEO diagnostics" data-reveal>
+<div class="eyebrow section-index">INTERACTIVE LAB / SYNTHETIC EXAMPLES</div>
+<h2>Pick a problem.<br><em>See how to catch it.</em></h2>
+<p class="experiment-lede">Try three common website errors. Click one to see what went wrong, why it matters, and what to check next.</p>
+<div class="lab-shell">
+<div class="scenario-controls" role="tablist" aria-label="Choose an example SEO failure">
+<h3>SELECT A FAILURE</h3>
+<button type="button" role="tab" class="scenario-tab" data-scenario="noindex" aria-selected="true" aria-controls="scenario-panel">01 / Accidental noindex</button>
+<button type="button" role="tab" class="scenario-tab" data-scenario="canonical" aria-selected="false" aria-controls="scenario-panel" tabindex="-1">02 / Wrong canonical</button>
+<button type="button" role="tab" class="scenario-tab" data-scenario="link" aria-selected="false" aria-controls="scenario-panel" tabindex="-1">03 / Broken internal link</button>
+</div>
+<div class="scenario-output" id="scenario-panel" role="tabpanel" aria-live="polite">
+<span class="scenario-location" data-scenario-path>/programmes/online-mba-ghana/</span>
+<pre class="scenario-code"><code data-scenario-code>&lt;meta name="robots" content="noindex"&gt;</code></pre>
+<div class="scenario-finding"><strong data-scenario-level>CRITICAL · INDEXABILITY</strong>
+<h3 data-scenario-title>An important page is excluded</h3>
+<p data-scenario-explanation>A crawler can flag unexpected noindex directives against an approved baseline.</p></div>
+</div></div>
+<p class="lab-caption">SIMULATION ONLY · These examples are predefined teaching fixtures and are not findings from the live Kestrel site. Real findings appear in the published audit above.</p>
+</section>"""
+    board = f"""<aside class="status-board" data-audit-feed="{PREFIX}/seo-health.json" aria-label="Actual published SEO audit" data-reveal>
+<div class="board-head"><span>KESTREL / RELEASE AUDIT</span><span class="indicator">SOURCE: PUBLISHED JSON</span></div>
+<div class="board-canvas">
+<svg class="circuit" viewBox="0 0 390 230" preserveAspectRatio="none" role="img" aria-label="Animated symbolic data pipeline">
+<path d="M20 40 H120 L160 96 H220 L275 40 H370 M20 195 H125 L170 136 H220 L280 195 H370"/>
+<path class="accent-path" d="M16 115 H132 L185 115 H365"/>
+<circle cx="18" cy="115" r="4"/><circle cx="364" cy="115" r="4"/>
+</svg>
+<span class="circuit-label top">01 / GENERATE</span>
+<span class="circuit-label right">02 / VALIDATE</span>
+<span class="circuit-label bottom">03 / REPORT</span>
+<div class="circuit-center" aria-hidden="true"><strong>K.</strong></div>
+</div>
+<div class="board-stats"><div class="board-kicker">DEPLOYED RELEASE / REAL REPORT</div>
+<div class="board-stat-grid"><div><strong data-audit-pages>…</strong><span>Pages checked</span></div>
+<div><strong data-audit-errors>…</strong><span>Errors reported</span></div></div>
+<p class="board-status" data-audit-status role="status">Reading the published audit…</p>
+<p class="board-status" data-audit-footnote></p>
+<a class="board-link" href="{base.rstrip('/')}/seo-health.html">Open the audit evidence ↗</a>
+</div>
+</aside>"""
     if section == "systems":
         content = f"""<section class="section-landing" data-reveal>
 <div class="eyebrow section-index">01 / HOW IT WORKS</div>
@@ -325,7 +366,7 @@ def section_page(section, base, noindex, pub):
 <p>The report checks page code and SEO settings. A clean result means the tested checks passed. It does not mean Google has ranked or indexed the pages.</p>
 <div class="proof-links"><a class="cta" href="{base.rstrip('/')}/seo-health.html">Open the full report ↗</a>
 <a class="cta-outline" href="https://github.com/graceomolola001-cmyk/kestrel-pseo/actions">See build runs on GitHub ↗</a></div></section>"""
-    return head(title, desc, canonical, noindex) + content + FOOT
+    return head(title, desc, canonical, noindex) + content + FOOT.replace("{PREFIX}", PREFIX)
 
 
 def main():
