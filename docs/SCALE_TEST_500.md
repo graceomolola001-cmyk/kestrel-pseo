@@ -20,6 +20,16 @@ From the top-level Kestrel folder in VS Code PowerShell:
 python -m seo_ops.scale_test --count 500
 ~~~
 
+To preview all 500 pages after this command finishes, run in the same project folder:
+
+~~~powershell
+python -m http.server 8000 --directory .\\reports\\scale-test\\site
+~~~
+
+Then visit **http://localhost:8000/programmes/**. The generated page links and
+assets are configured for that local address, so browsing works without a
+public deployment. Keep the server terminal open while viewing the pages.
+
 This runs the real Kestrel pipeline:
 
 1. Create 500 unique, fictional rows with valid country-currency pairs and synthetic sources.
