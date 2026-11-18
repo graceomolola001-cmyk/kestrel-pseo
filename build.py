@@ -26,6 +26,8 @@ import pseo_checker as pc
 
 SITE = "Kestrel eCampus"
 PREFIX = ""  # set from --base-url: "" for a root site, "/repo-name" for a GitHub project site
+GA4_MEASUREMENT_ID = ""
+GSC_VERIFICATION_TOKEN = ""
 CSS = """
 :root{--ink:#18233a;--muted:#607087;--accent:#533e80;--teal:#166d73;--line:#dfe3ec;--bg:#f6f8fb;--card:#fff}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:var(--bg);font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}a{color:var(--accent);text-underline-offset:3px}:focus-visible{outline:3px solid #e9ac4e;outline-offset:3px}
@@ -80,6 +82,22 @@ def faq(r):
 
 def head(title, desc, canonical, noindex):
     robots = "noindex, nofollow" if noindex else "index, follow"
+    verification_tag = (
+        f'<meta name="google-site-verification" content="{esc(GSC_VERIFICATION_TOKEN)}">'
+        if GSC_VERIFICATION_TOKEN else ""
+    )
+    analytics_tag = ""
+    if GA4_MEASUREMENT_ID:
+        # Google tag ID is a public web-stream identifier, never a credential.
+        tag_id_json = json.dumps(GA4_MEASUREMENT_ID)
+        analytics_tag = f"""
+<script async src="https://www.googletagmanager.com/gtag/js?id={GA4_MEASUREMENT_ID}"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag() {{ dataLayer.push(arguments); }}
+  gtag('js', new Date());
+  gtag('config', {tag_id_json});
+</script>"""
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -89,6 +107,8 @@ def head(title, desc, canonical, noindex):
 <meta name="description" content="{esc(desc)}">
 <meta name="robots" content="{robots}">
 <link rel="canonical" href="{esc(canonical)}">
+{verification_tag}
+{analytics_tag}
 <style>{CSS}</style>
 </head>
 <body>
@@ -234,8 +254,16 @@ def main():
     ap.add_argument("--index", action="store_true", help="allow indexing and write sitemap.xml")
     ap.add_argument("--faq-schema", action="store_true", help="write FAQPage JSON-LD")
     a = ap.parse_args()
-    global PREFIX
+    global PREFIX, GA4_MEASUREMENT_ID, GSC_VERIFICATION_TOKEN
     PREFIX = urlparse(a.base_url).path.rstrip("/")
+    GA4_MEASUREMENT_ID = os.environ.get("KESTREL_GA4_MEASUREMENT_ID", "").strip()
+    GSC_VERIFICATION_TOKEN = os.environ.get("KESTREL_GSC_VERIFICATION_TOKEN", "").strip()
+    if GA4_MEASUREMENT_ID and not re.fullmatch(r"G-[A-Z0-9]{5,20}", GA4_MEASUREMENT_ID):
+        print("Build stopped: KESTREL_GA4_MEASUREMENT_ID must be a GA4 web stream ID starting with G-")
+        return 2
+    if GSC_VERIFICATION_TOKEN and not re.fullmatch(r"[A-Za-z0-9_+=/-]{8,256}", GSC_VERIFICATION_TOKEN):
+        print("Build stopped: expected only the HTML verification tag content, not the full meta tag")
+        return 2
 
     rows, missing = pc.load(a.csv)
     if missing:
