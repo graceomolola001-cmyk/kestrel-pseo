@@ -305,7 +305,7 @@ def section_page(section, base, noindex, pub):
         "lab": ("Try the SEO error lab | Kestrel",
                 "Try simple examples of noindex, wrong canonical URLs and broken links."),
         "reports": ("Live SEO reports and checks | Kestrel",
-                    "See what Kestrel's real page tests found.")
+                    "See which Kestrel pages were tested, read the latest technical results, and learn what each finding means.")
     }
     title, desc = titles[section]
     canonical = base.rstrip("/") + f"/{section}/"
