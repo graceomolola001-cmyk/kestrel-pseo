@@ -5,7 +5,7 @@
 **Project owner: Grace Odukoya**  
 SEO specialist • Technical SEO • Python & Google Apps Script • Automation engineering • Growth analytics
 
-[Explore the SEO Operations Control Center](seo_ops/README.md) · [Read the technical case study](seo_ops/docs/PORTFOLIO_CASE_STUDY.md) · [View automated tests and deployments](https://github.com/graceomolola001-cmyk/kestrel-pseo/actions)
+[Connect GA4 and Search Console](docs/GOOGLE_SETUP.md) · [Explore the SEO Operations Control Center](seo_ops/README.md) · [Read the technical case study](seo_ops/docs/PORTFOLIO_CASE_STUDY.md) · [View automated tests and deployments](https://github.com/graceomolola001-cmyk/kestrel-pseo/actions)
 
 ## Why I built this
 
