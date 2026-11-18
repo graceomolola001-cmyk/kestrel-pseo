@@ -4,6 +4,31 @@
   const reducedMotion=window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const onReady=(callback)=>document.readyState==="loading"?document.addEventListener("DOMContentLoaded",callback,{once:true}):callback();
   onReady(function(){
+    // Clear mobile menu for a true multi-page website.
+    const menuButton=document.querySelector("[data-menu-toggle]");
+    const nav=document.querySelector("#primary-nav");
+    if(menuButton && nav){
+      const closeMenu=()=>{
+        nav.classList.remove("is-open");
+        menuButton.setAttribute("aria-expanded","false");
+      };
+      menuButton.addEventListener("click",()=>{
+        const opened=nav.classList.toggle("is-open");
+        menuButton.setAttribute("aria-expanded",String(opened));
+      });
+      nav.querySelectorAll("a").forEach(link=>link.addEventListener("click",closeMenu));
+      document.addEventListener("keydown",event=>{
+        if(event.key==="Escape")closeMenu();
+      });
+    }
+    const path=window.location.pathname.replace(/\/+$/,"/") || "/";
+    document.querySelectorAll(".site-nav a").forEach(link=>{
+      const target=new URL(link.href,window.location.origin).pathname.replace(/\/+$/,"/") || "/";
+      if(path===target || (target.endsWith("/systems/") && path.startsWith(target))){
+        link.setAttribute("aria-current","page");
+      }
+    });
+
     // Reusable entrance animation. Content stays accessible without JavaScript.
     if(!reducedMotion && "IntersectionObserver" in window){
       document.documentElement.classList.add("js-enhanced");
