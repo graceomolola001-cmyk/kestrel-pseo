@@ -33,6 +33,9 @@ jobs:
         run: python pseo_checker.py data/pages.csv
 
       - name: Build the site
+        env:
+          KESTREL_GA4_MEASUREMENT_ID: ${{ vars.KESTREL_GA4_MEASUREMENT_ID }}
+          KESTREL_GSC_VERIFICATION_TOKEN: ${{ vars.KESTREL_GSC_VERIFICATION_TOKEN }}
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
           REPO="${{ github.event.repository.name }}"
