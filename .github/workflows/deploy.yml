@@ -37,7 +37,7 @@ jobs:
 
       - name: Build the site
         env:
-          KESTREL_GA4_MEASUREMENT_ID: ${{ vars.KESTREL_GA4_MEASUREMENT_ID }}
+          KESTREL_GA4_MEASUREMENT_ID: ${{ vars.KESTREL_GA4_MEASUREMENT_ID || 'G-K3E3Z1C089' }}
           KESTREL_GSC_VERIFICATION_TOKEN: ${{ vars.KESTREL_GSC_VERIFICATION_TOKEN }}
         run: |
           OWNER=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')

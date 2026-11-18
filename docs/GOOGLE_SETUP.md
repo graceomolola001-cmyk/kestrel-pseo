@@ -8,12 +8,10 @@ Kestrel is a **fictional, intentionally noindex** SEO engineering demonstration.
 2. Under **Admin → Data streams**, create a **Web** stream for:
    https://graceomolola001-cmyk.github.io/kestrel-pseo/
 3. Copy the **Measurement ID** (begins with G-). This identifies the web stream and is **not** the numeric GA4 property ID.
-4. In the Kestrel GitHub repository, go to **Settings → Secrets and variables → Actions → Variables**.
-5. Create a **repository variable**:
-   - Name: KESTREL_GA4_MEASUREMENT_ID
-   - Value: your real G- measurement ID
-6. Go to **Actions → Check, build and deploy → Run workflow** on main. The build adds Google's normal gtag.js snippet to generated pages.
-7. View page source and search for your G- measurement ID to confirm installation. Open the website in a normal browser and examine **GA4 → Reports → Realtime** or DebugView to check incoming events.
+4. **Current Kestrel default:** the deployment workflow includes the public web Measurement ID `G-K3E3Z1C089`. The numeric GA4 property ID supplied for API reporting is `565038230` (the latter is not a browser tracking tag).
+5. The default is used when no repository variable named `KESTREL_GA4_MEASUREMENT_ID` is set. If that variable already exists, it takes priority, so check it if the website shows another measurement ID.
+6. Open **Actions → Check, build and deploy** to confirm the release deployed. New deployments add Google's normal `gtag.js` snippet to generated pages.
+7. View page source and search for `G-K3E3Z1C089` to confirm installation. Visit the site, then check **GA4 → Reports → Realtime** or DebugView for incoming events.
 
 **Do not** add the GA4 measurement ID as a service account key or OAuth client secret. It is a public browser-side ID and can be stored as a GitHub Actions variable.
 
@@ -42,9 +40,9 @@ The pages deliberately remain **noindex**; Search Console can verify ownership w
 - build.py reads the two **optional** environment variables.
 - It validates the expected G- measurement ID and GSC verification-token format.
 - It emits the GA4 gtag.js loader and/or Google verification meta tag into the HTML head.
-- If neither value is provided, builds still work and no Google tracking is injected.
+- The deployed build defaults to `G-K3E3Z1C089` if the optional GA4 repository variable is absent. Local builds without configuration still do not inject Google tracking.
 - The automated tests verify both the no-credentials and configured paths.
-- GitHub Actions supplies repository variables to the build job; the tag is added only after a successful deployment.
+- GitHub Actions passes the configured repository variable, if supplied, or the current public default Measurement ID. The tag is included in the published pages after successful deployment.
 
 ## D. Connecting the reporting APIs is a different step
 
