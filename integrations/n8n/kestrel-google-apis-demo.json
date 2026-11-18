@@ -78,7 +78,7 @@
       ],
       "parameters": {
         "mode": "runOnceForAllItems",
-        "jsCode": "// Kestrel: combine three REAL HTTP responses. No synthetic traffic values.\nconst ga4 = $('GA4 Data API').first().json;\nconst gsc = $('Search Console API').first().json;\nconst audit = $input.first().json;\nif (!ga4 || typeof ga4 !== 'object' || !gsc || typeof gsc !== 'object') {\n  throw new Error('One Google API response is missing');\n}\nif (!audit || !audit.counts || !Number.isFinite(Number(audit.counts.error))) {\n  throw new Error('Unexpected published SEO audit format');\n}\nconst ga4Rows = Array.isArray(ga4.rows) ? ga4.rows : [];\nconst gscRows = Array.isArray(gsc.rows) ? gsc.rows : [];\nconst ga4Sessions = ga4Rows.reduce((sum, row) =>\n  sum + Number(row.metricValues?.[0]?.value ?? 0), 0);\nconst ga4Views = ga4Rows.reduce((sum, row) =>\n  sum + Number(row.metricValues?.[1]?.value ?? 0), 0);\nconst gscClicks = gscRows.reduce((sum, row) => sum + Number(row.clicks ?? 0), 0);\nconst gscImpressions = gscRows.reduce((sum, row) => sum + Number(row.impressions ?? 0), 0);\nconst errors = Number(audit.counts.error);\nconst warnings = Number(audit.counts.warning ?? 0);\nreturn [{\n  json: {\n    project: 'Kestrel SEO Operations Lab',\n    data_source: 'Authenticated Google APIs and published Kestrel technical audit',\n    ga4_property: '565038230',\n    gsc_property: 'https://graceomolola001-cmyk.github.io/kestrel-pseo/',\n    ga4_daily_rows: ga4Rows.length,\n    ga4_reported_sessions: ga4Sessions,\n    ga4_reported_page_views: ga4Views,\n    ga4_status: ga4Rows.length ? 'Report rows returned' : 'No standard report rows yet',\n    gsc_page_rows: gscRows.length,\n    gsc_returned_clicks: gscClicks,\n    gsc_returned_impressions: gscImpressions,\n    gsc_status: gscRows.length ? 'Search performance rows returned' : 'No search rows yet (expected for noindex demo)',\n    gsc_scope_note: 'GSC returns top page rows; sums are limited to returned rows.',\n    audit_pages_checked: Number(audit.pages_checked || 0),\n    audit_errors: errors,\n    audit_warnings: warnings,\n    audit_generated_at: audit.created_at || 'unknown',\n    needs_technical_review: errors > 0,\n    message: errors > 0\n      ? 'Technical errors found. Investigate the reported pages.'\n      : 'No critical findings in checked scope. Confirm the audit covered all important pages.',\n    data_integrity_note: 'Zero rows are reported as zero rows. No search or session metrics are invented.'\n  }\n}];"
+        "jsCode": "// Kestrel: combine three REAL HTTP responses. No synthetic traffic values.\nconst ga4 = $('GA4 Data API').first().json;\nconst realtime = $('GA4 Realtime API').first().json;\nconst gsc = $('Search Console API').first().json;\nconst audit = $input.first().json;\nif (!ga4 || typeof ga4 !== 'object' || !gsc || typeof gsc !== 'object') {\n  throw new Error('One Google API response is missing');\n}\nif (!audit || !audit.counts || !Number.isFinite(Number(audit.counts.error))) {\n  throw new Error('Unexpected published SEO audit format');\n}\nconst ga4Rows = Array.isArray(ga4.rows) ? ga4.rows : [];\nconst realtimeRows = Array.isArray(realtime.rows) ? realtime.rows : [];\nconst activeUsersNow = realtimeRows.reduce((sum, row) => sum + Number(row.metricValues?.[0]?.value ?? 0), 0);\nconst gscRows = Array.isArray(gsc.rows) ? gsc.rows : [];\nconst ga4Sessions = ga4Rows.reduce((sum, row) =>\n  sum + Number(row.metricValues?.[0]?.value ?? 0), 0);\nconst ga4Views = ga4Rows.reduce((sum, row) =>\n  sum + Number(row.metricValues?.[1]?.value ?? 0), 0);\nconst gscClicks = gscRows.reduce((sum, row) => sum + Number(row.clicks ?? 0), 0);\nconst gscImpressions = gscRows.reduce((sum, row) => sum + Number(row.impressions ?? 0), 0);\nconst errors = Number(audit.counts.error);\nconst warnings = Number(audit.counts.warning ?? 0);\nreturn [{\n  json: {\n    project: 'Kestrel SEO Operations Lab',\n    data_source: 'Authenticated Google APIs and published Kestrel technical audit',\n    ga4_property: '565038230',\n    gsc_property: 'https://graceomolola001-cmyk.github.io/kestrel-pseo/',\n    ga4_daily_rows: ga4Rows.length,\n    ga4_reported_sessions: ga4Sessions,\n    ga4_reported_page_views: ga4Views,\n    ga4_realtime_active_users: activeUsersNow,\n    ga4_realtime_status: realtimeRows.length ? 'Realtime data returned' : 'No active users in current realtime window',\n    ga4_status: ga4Rows.length ? 'Report rows returned' : 'No standard report rows yet',\n    gsc_page_rows: gscRows.length,\n    gsc_returned_clicks: gscClicks,\n    gsc_returned_impressions: gscImpressions,\n    gsc_status: gscRows.length ? 'Search performance rows returned' : 'No search rows yet (expected for noindex demo)',\n    gsc_scope_note: 'GSC returns top page rows; sums are limited to returned rows.',\n    audit_pages_checked: Number(audit.pages_checked || 0),\n    audit_errors: errors,\n    audit_warnings: warnings,\n    audit_generated_at: audit.created_at || 'unknown',\n    needs_technical_review: errors > 0,\n    message: errors > 0\n      ? 'Technical errors found. Investigate the reported pages.'\n      : 'No critical findings in checked scope. Confirm the audit covered all important pages.',\n    data_integrity_note: 'Zero rows are reported as zero rows. No search or session metrics are invented.'\n  }\n}];"
       }
     },
     {
@@ -135,6 +135,26 @@
         430
       ],
       "parameters": {}
+    },
+    {
+      "id": "c7a7f1b0-0c40-482b-81c1-000000000010",
+      "name": "GA4 Realtime API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        160
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://analyticsdata.googleapis.com/v1beta/properties/565038230:runRealtimeReport",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"metrics\":[{\"name\":\"activeUsers\"}]}",
+        "options": {}
+      }
     }
   ],
   "connections": {
@@ -153,7 +173,7 @@
       "main": [
         [
           {
-            "node": "Search Console API",
+            "node": "GA4 Realtime API",
             "type": "main",
             "index": 0
           }
@@ -205,6 +225,17 @@
         [
           {
             "node": "No critical issues in scope",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GA4 Realtime API": {
+      "main": [
+        [
+          {
+            "node": "Search Console API",
             "type": "main",
             "index": 0
           }
