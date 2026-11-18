@@ -5,6 +5,7 @@ on:
   pull_request:
     branches: [main]
     paths:
+      - 'build.py'
       - 'seo_ops/scale_test.py'
       - 'seo_ops/tests/test_scale_test.py'
       - '.github/workflows/scale-test.yml'
