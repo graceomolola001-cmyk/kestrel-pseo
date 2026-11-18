@@ -101,14 +101,14 @@ def head(title, desc, canonical, noindex):
 <body>
 <div class="lab-ribbon"><span>KESTREL / SEO SYSTEMS FIELD NOTES <strong>★ LAB EDITION</strong></span><span>OPEN SOURCE · FICTIONAL DATASET</span></div>
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site"><div class="nav-wrap"><a class="brand" href="{PREFIX}/"><span class="brand-mark" aria-hidden="true">K.</span><span>Kestrel <small>SEO OPERATIONS LAB</small></span></a><nav class="site-nav" aria-label="Primary navigation"><a href="{PREFIX}/">Home</a><a href="{PREFIX}/#laboratory">The lab</a><a class="nav-cta" href="{PREFIX}/programmes/">Browse pages ↗</a></nav></div></header>
+<header class="site"><div class="nav-wrap"><a class="brand" href="{PREFIX}/"><span class="brand-mark" aria-hidden="true">K.</span><span>Kestrel <small>SEO OPERATIONS LAB</small></span></a><nav class="site-nav" aria-label="Primary navigation"><a href="{PREFIX}/">Home</a><a href="{PREFIX}/systems/">How it works</a><a href="{PREFIX}/lab/">Try the lab</a><a href="{PREFIX}/reports/">Reports</a><a class="nav-cta" href="{PREFIX}/programmes/">Pages ↗</a></nav></div></header>
 <main id="main">
 """
 
 
 FOOT = """
 </main>
-<footer class="site-footer"><div class="footer-inner"><span>KESTREL SEO OPERATIONS LAB / Fictional education data used for engineering demonstrations.</span><span><a href="https://github.com/graceomolola001-cmyk/kestrel-pseo">Source code ↗</a> · <a href="https://github.com/graceomolola001-cmyk/kestrel-pseo/actions">Build evidence ↗</a></span></div></footer>
+<footer class="site-footer"><div class="footer-inner"><span>KESTREL SEO OPERATIONS LAB / Fictional education data used for engineering demonstrations.</span><span><a href="{PREFIX}/systems/">How it works</a> · <a href="{PREFIX}/lab/">Try the lab</a> · <a href="{PREFIX}/reports/">Reports</a> · <a href="https://github.com/graceomolola001-cmyk/kestrel-pseo">GitHub ↗</a></span></div></footer>
 </body>
 </html>
 """
@@ -178,7 +178,7 @@ def page(r, pub, base, noindex, faq_schema):
 </aside>
 </div>
 {ld}"""
-    return head(title, meta_description(r), canonical, noindex) + body + FOOT
+    return head(title, meta_description(r), canonical, noindex) + body + FOOT.replace("{PREFIX}", PREFIX)
 
 def hub(pub, base, noindex, home=False):
     progs = list(dict.fromkeys(r["programme"] for r in pub))
@@ -222,10 +222,10 @@ def hub(pub, base, noindex, home=False):
         hero = f"""<section class="hero" aria-label="Kestrel lab introduction">
 <div class="hero-copy" data-reveal>
 <div class="eyebrow section-index">CASE FILE 001 / ENGINEERED SEO</div>
-<h1>Good SEO needs <em>good systems.</em></h1>
-<p class="hero-lede">A small, independent engineering lab for the parts of SEO that deserve more than a manual checklist. Generate pages. Catch mistakes before release. Make the evidence easy to read.</p>
-<div class="hero-actions"><a class="cta" href="#laboratory">Try the diagnostic lab ↗</a>
-<a class="cta-outline" href="#catalogue">Explore generated pages</a></div>
+<h1>Find SEO problems <em>before they grow.</em></h1>
+<p class="hero-lede">Meet a website built to find SEO mistakes early. See how pages are made, checked, and watched after they go live. Try the tools yourself.</p>
+<div class="hero-actions"><a class="cta" href="{PREFIX}/lab/">Try the SEO lab ↗</a>
+<a class="cta-outline" href="{PREFIX}/programmes/">Explore the pages</a></div>
 <p class="hero-footnote">The education website, programmes and course details are fictional. The code, deployment process and automated SEO checks are real.</p>
 </div>
 <aside class="status-board" data-audit-feed="{PREFIX}/seo-health.json" aria-label="Actual published SEO audit" data-reveal>
@@ -254,16 +254,47 @@ def hub(pub, base, noindex, home=False):
 <div class="ticker-track" aria-hidden="true"><span>Generate from structured data</span><span>Validate before publishing</span><span>Monitor the live output</span><span>Generate from structured data</span><span>Validate before publishing</span></div></div>
 <section class="section" aria-label="How Kestrel operates" data-reveal>
 <div class="section-heading"><div><div class="eyebrow section-index">01 / HOW IT WORKS</div><h2>Built to catch<br><em>the quiet mistakes.</em></h2></div>
-<p>A broken canonical or a stray noindex can affect hundreds of pages. Kestrel applies predictable rules at publish time, then generates reports people can actually act on.</p></div>
+<p>One small mistake can affect many pages. Kestrel checks for common errors before a page goes live. It also creates clear reports so teams know what to fix.</p></div>
 <div class="workflow-grid">
-<article class="workflow-step"><div class="step-no">01 / GENERATE</div><h3>Start with the source.</h3><p>Structured records power the HTML templates, page titles, metadata and contextual internal links.</p></article>
-<article class="workflow-step"><div class="step-no">02 / VALIDATE</div><h3>Make the build prove itself.</h3><p>Python checks data quality, generated HTML, canonical patterns, schema and redirect rules before deployment.</p></article>
-<article class="workflow-step"><div class="step-no">03 / MONITOR</div><h3>Keep watching after launch.</h3><p>Bounded crawls and structured reports surface technical issues for a human to investigate.</p></article>
+<article class="workflow-step"><div class="step-no">01 / GENERATE</div><h3>Start with the source.</h3><p>A simple table holds the page details. Python turns that table into real HTML pages with titles and links.</p></article>
+<article class="workflow-step"><div class="step-no">02 / VALIDATE</div><h3>Make the build prove itself.</h3><p>The site checks page titles, links, page addresses, and code before each release. A serious error can stop the release.</p></article>
+<article class="workflow-step"><div class="step-no">03 / MONITOR</div><h3>Keep watching after launch.</h3><p>A crawler checks the live site and writes a report. A person reviews the issues and decides what to fix.</p></article>
 </div></section>
-<section class="experiment" id="laboratory" aria-label="Interactive technical SEO diagnostics" data-reveal>
+"""
+
+        routes = f"""<section class="section" data-reveal aria-label="Explore the SEO lab">
+<div class="eyebrow section-index">CHOOSE WHERE TO GO</div><h2>Take a look <em>inside.</em></h2>
+<div class="route-grid">
+<a class="route-card" href="{PREFIX}/systems/"><small>01 / THE SYSTEM</small><b>How does it work?</b><span>Follow the steps from page data to a live website.</span><small>SEE THE STEPS ↗</small></a>
+<a class="route-card" href="{PREFIX}/lab/"><small>02 / TRY IT</small><b>Can you spot the error?</b><span>Try three real kinds of SEO mistakes in a safe demo.</span><small>OPEN THE LAB ↗</small></a>
+<a class="route-card" href="{PREFIX}/reports/"><small>03 / THE PROOF</small><b>What did the checks find?</b><span>See the results from the site's latest build.</span><small>VIEW REPORTS ↗</small></a>
+</div></section>"""
+        body = hero + routes
+    else:
+        title = f"Programme catalogue | {SITE} SEO lab"
+        desc = "Browse generated and validated fictional programme pages in the Kestrel SEO engineering demonstration."
+        canonical = base.rstrip("/") + "/programmes/"
+        lead = """<section class="collection-head" data-reveal><div><div class="eyebrow section-index">INDEX / GENERATED PAGES</div>
+<h1>The page library.</h1></div><p>Fictional programme records, generated from a shared template. Use the filters to explore how one validated dataset becomes a linked page collection.</p></section>"""
+        body = lead + catalogue
+    return head(title, desc, canonical, noindex) + body + FOOT.replace("{PREFIX}", PREFIX)
+
+def section_page(section, base, noindex, pub):
+    """Standalone sections with their own URLs, canonicals and page copy."""
+    titles = {
+        "systems": ("How Kestrel checks SEO pages | Kestrel",
+                    "Follow the steps Kestrel uses to make pages, test them and find errors."),
+        "lab": ("Try the SEO error lab | Kestrel",
+                "Try simple examples of noindex, wrong canonical URLs and broken links."),
+        "reports": ("Live SEO reports and checks | Kestrel",
+                    "Read results from Kestrel's real automated page checks.")
+    }
+    title, desc = titles[section]
+    canonical = base.rstrip("/") + f"/{section}/"
+    experiment = """<section class="experiment" id="diagnostics" aria-label="Interactive technical SEO diagnostics" data-reveal>
 <div class="eyebrow section-index">INTERACTIVE LAB / SYNTHETIC EXAMPLES</div>
-<h2>Break something.<br><em>See what gets caught.</em></h2>
-<p class="experiment-lede">Choose a common technical SEO failure. This interactive simulation explains how a rules-based checker could identify it and what an SEO specialist should investigate next.</p>
+<h2>Pick a problem.<br><em>See how to catch it.</em></h2>
+<p class="experiment-lede">Try three common website errors. Click one to see what went wrong, why it matters, and what to check next.</p>
 <div class="lab-shell">
 <div class="scenario-controls" role="tablist" aria-label="Choose an example SEO failure">
 <h3>SELECT A FAILURE</h3>
@@ -280,15 +311,63 @@ def hub(pub, base, noindex, home=False):
 </div></div>
 <p class="lab-caption">SIMULATION ONLY · These examples are predefined teaching fixtures and are not findings from the live Kestrel site. Real findings appear in the published audit above.</p>
 </section>"""
-        body = hero + catalogue
-    else:
-        title = f"Programme catalogue | {SITE} SEO lab"
-        desc = "Browse generated and validated fictional programme pages in the Kestrel SEO engineering demonstration."
-        canonical = base.rstrip("/") + "/programmes/"
-        lead = """<section class="collection-head" data-reveal><div><div class="eyebrow section-index">INDEX / GENERATED PAGES</div>
-<h1>The page library.</h1></div><p>Fictional programme records, generated from a shared template. Use the filters to explore how one validated dataset becomes a linked page collection.</p></section>"""
-        body = lead + catalogue
-    return head(title, desc, canonical, noindex) + body + FOOT
+    board = f"""<aside class="status-board" data-audit-feed="{PREFIX}/seo-health.json" aria-label="Actual published SEO audit" data-reveal>
+<div class="board-head"><span>KESTREL / RELEASE AUDIT</span><span class="indicator">SOURCE: PUBLISHED JSON</span></div>
+<div class="board-canvas">
+<svg class="circuit" viewBox="0 0 390 230" preserveAspectRatio="none" role="img" aria-label="Animated symbolic data pipeline">
+<path d="M20 40 H120 L160 96 H220 L275 40 H370 M20 195 H125 L170 136 H220 L280 195 H370"/>
+<path class="accent-path" d="M16 115 H132 L185 115 H365"/>
+<circle cx="18" cy="115" r="4"/><circle cx="364" cy="115" r="4"/>
+</svg>
+<span class="circuit-label top">01 / GENERATE</span>
+<span class="circuit-label right">02 / VALIDATE</span>
+<span class="circuit-label bottom">03 / REPORT</span>
+<div class="circuit-center" aria-hidden="true"><strong>K.</strong></div>
+</div>
+<div class="board-stats"><div class="board-kicker">DEPLOYED RELEASE / REAL REPORT</div>
+<div class="board-stat-grid"><div><strong data-audit-pages>…</strong><span>Pages checked</span></div>
+<div><strong data-audit-errors>…</strong><span>Errors reported</span></div></div>
+<p class="board-status" data-audit-status role="status">Reading the published audit…</p>
+<p class="board-status" data-audit-footnote></p>
+<a class="board-link" href="{base.rstrip('/')}/seo-health.html">Open the audit evidence ↗</a>
+</div>
+</aside>"""
+    if section == "systems":
+        content = f"""<section class="section-landing" data-reveal>
+<div class="eyebrow section-index">01 / HOW IT WORKS</div>
+<h1>From page data<br>to a <em>checked website.</em></h1>
+<p class="hero-lede">Kestrel starts with a table. Python makes the pages. Then tests look for mistakes before the site goes live. Here's how each part works.</p></section>
+<section class="page-guide" data-reveal><div class="eyebrow">THE FOUR STEPS</div>
+<ol class="process-list">
+<li><div><strong>Collect the page details</strong><p>A CSV file holds the course name, market, fees, dates, and other sample facts. Each row is checked before it can be published.</p></div></li>
+<li><div><strong>Make the HTML pages</strong><p>Python uses one shared template to build every page. It also adds page titles, descriptions, and links to related pages.</p></div></li>
+<li><div><strong>Check the work before release</strong><p>Tests look for broken links, bad page details, and wrong SEO code. GitHub Actions can stop a release when a serious test fails.</p></div></li>
+<li><div><strong>Check the live site again</strong><p>A scheduled crawler checks the published pages. It writes an easy-to-read report and a JSON file for other tools.</p></div></li>
+</ol>
+<div class="proof-note"><strong>What you should know:</strong> The course details are made up for this demo. The Python scripts and test results are real. The pages are marked noindex on purpose.</div>
+<div class="proof-links"><a class="cta" href="{PREFIX}/reports/">See the audit results ↗</a><a class="cta-outline" href="https://github.com/graceomolola001-cmyk/kestrel-pseo/blob/main/build.py">Read the Python code ↗</a></div>
+</section>"""
+    elif section == "lab":
+        content = f"""<section class="section-landing" data-reveal>
+<div class="eyebrow section-index">02 / TRY THE LAB</div>
+<h1>What happens when<br><em>SEO goes wrong?</em></h1>
+<p class="hero-lede">A page can look fine and still have a hidden SEO problem. Try one of the examples below to see how a checker would spot it.</p></section>
+{experiment}
+<div class="page-guide"><div class="proof-note"><strong>These are practice examples.</strong> They do not change or scan the live site. To see results from Kestrel's real tests, open the reports page.</div>
+<a class="cta" href="{PREFIX}/reports/">View the real reports ↗</a></div>"""
+    elif section == "reports":
+        content = f"""<section class="section-landing" data-reveal>
+<div class="eyebrow section-index">03 / THE RESULTS</div>
+<h1>Show the work.<br><em>Show the checks.</em></h1>
+<p class="hero-lede">This page reads a real report from Kestrel's published website. It shows how many pages were checked and whether the tests found errors.</p></section>
+<section class="report-panel" data-reveal>{board}</section>
+<section class="page-guide" data-reveal><div class="eyebrow">WHAT THE REPORT MEANS</div>
+<h2>Proof you can <em>open and read.</em></h2>
+<p>The report checks page code and SEO settings. A clean result means the tested checks passed. It does not mean Google has ranked or indexed the pages.</p>
+<div class="proof-links"><a class="cta" href="{base.rstrip('/')}/seo-health.html">Open the full report ↗</a>
+<a class="cta-outline" href="https://github.com/graceomolola001-cmyk/kestrel-pseo/actions">See build runs on GitHub ↗</a></div></section>"""
+    return head(title, desc, canonical, noindex) + content + FOOT.replace("{PREFIX}", PREFIX)
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -348,6 +427,8 @@ def main():
         write(path_for(r) + "index.html", page(r, pub, a.base_url, noindex, a.faq_schema))
     write("/programmes/index.html", hub(pub, a.base_url, noindex))
     write("/index.html", hub(pub, a.base_url, noindex, home=True))
+    for section in ("systems", "lab", "reports"):
+        write(f"/{section}/index.html", section_page(section, a.base_url, noindex, pub))
     # Allow crawling so the page-level noindex directive can be discovered.
     # For GitHub project pages, host-root robots.txt is controlled separately.
     robots = "User-agent: *\nAllow: /\n"
