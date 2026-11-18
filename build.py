@@ -209,7 +209,7 @@ def hub(pub, base, noindex, home=False):
     body = f"""<section class="hero">
 <div class="eyebrow"><span class="dot" aria-hidden="true"></span> TECHNICAL SEO ENGINEERING DEMONSTRATION</div>
 <h1>{esc(h1)}</h1>
-<p class="hero-lede">Explore a fictional education website generated from structured source records. This project demonstrates programmatic SEO, automated technical checks and repeatable quality assurance. None of the programme information is a real admissions offer.</p>
+<p class="hero-lede">Explore a fictional education website generated from structured source records. This project demonstrates programmatic SEO, automated technical checks and repeatable quality assurance. Programme information here is illustrative and does not represent a real admissions offer.</p>
 <div class="hero-actions"><a class="cta" href="#catalogue">Explore the catalogue ↗</a><a class="text-link" href="https://github.com/graceomolola001-cmyk/kestrel-pseo">Review the Python code</a></div>
 <div class="hero-metrics"><div><strong>{len(pub)}</strong><span>Programme records</span></div><div><strong>{len(progs)}</strong><span>Subject groups</span></div><div><strong>3</strong><span>Build, validate, monitor</span></div></div>
 </section>
