@@ -28,7 +28,7 @@ MARKETS = [
     ("Nigeria", "NGN"), ("Ghana", "GHS"),
     ("Zambia", "ZMW"), ("Malawi", "MWK"),
 ]
-BASE = "https://example.test/kestrel-scale-test"
+BASE = "http://localhost:8000"  # local preview uses the site directory as web root
 
 
 def fixture_rows(count: int):
