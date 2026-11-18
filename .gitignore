@@ -3,3 +3,16 @@ __pycache__/
 *.pyc
 data/pages.backup*.csv
 .DS_Store
+
+# Local Google/API credentials and non-public report exports
+.env
+.env.*
+!.env.example
+credentials/
+private/
+.secrets/
+.kestrel-private/
+*service-account*.json
+*service_account*.json
+*credentials*.json
+reports/
