@@ -23,6 +23,7 @@ import sys
 from urllib.parse import urlparse
 
 import pseo_checker as pc
+from site_pages import render_pages
 
 SITE = "Kestrel eCampus"
 PREFIX = ""  # set from --base-url: "" for a root site, "/repo-name" for a GitHub project site
@@ -99,9 +100,9 @@ def head(title, desc, canonical, noindex):
 <script defer src="{PREFIX}/assets/site.js"></script>
 </head>
 <body>
-<div class="lab-ribbon"><span>KESTREL / SEO SYSTEMS FIELD NOTES <strong>★ LAB EDITION</strong></span><span>OPEN SOURCE · FICTIONAL DATASET</span></div>
+<div class="lab-ribbon"><span>KESTREL / SEO SYSTEMS FIELD NOTES <strong>★ PRISM AUTHORITY EDITION</strong></span><span>OPEN SOURCE · FICTIONAL DATASET</span></div>
 <a class="skip-link" href="#main">Skip to content</a>
-<header class="site"><div class="nav-wrap"><a class="brand" href="{PREFIX}/"><span class="brand-mark" aria-hidden="true">K.</span><span>Kestrel <small>SEO OPERATIONS LAB</small></span></a><nav class="site-nav" aria-label="Primary navigation"><a href="{PREFIX}/">Home</a><a href="{PREFIX}/#laboratory">The lab</a><a class="nav-cta" href="{PREFIX}/programmes/">Browse pages ↗</a></nav></div></header>
+<header class="site"><div class="nav-wrap"><a class="brand" href="{PREFIX}/"><span class="brand-mark" aria-hidden="true">K.</span><span>Kestrel <small>SEO OPERATIONS LAB</small></span></a><button type="button" class="menu-toggle" data-menu-toggle aria-expanded="false" aria-controls="primary-nav">Menu <span aria-hidden="true">☰</span></button><nav class="site-nav" id="primary-nav" aria-label="Primary navigation"><a href="{PREFIX}/">Overview</a><a href="{PREFIX}/systems/">Systems</a><a href="{PREFIX}/lab/">The lab</a><a href="{PREFIX}/case-studies/kestrel/">Case study</a><a class="nav-cta" href="{PREFIX}/programmes/">Page library ↗</a></nav></div></header>
 <main id="main">
 """
 
@@ -347,7 +348,13 @@ def main():
     for r in pub:
         write(path_for(r) + "index.html", page(r, pub, a.base_url, noindex, a.faq_schema))
     write("/programmes/index.html", hub(pub, a.base_url, noindex))
-    write("/index.html", hub(pub, a.base_url, noindex, home=True))
+    # Standalone multi-page architecture, including nested system documentation.
+    markets = {r["country"] for r in pub}
+    site_documents = render_pages(
+        head, FOOT, a.base_url, PREFIX, noindex, len(pub), len(markets)
+    )
+    for url_path, document in site_documents.items():
+        write(url_path + "index.html", document)
     # Allow crawling so the page-level noindex directive can be discovered.
     # For GitHub project pages, host-root robots.txt is controlled separately.
     robots = "User-agent: *\nAllow: /\n"
