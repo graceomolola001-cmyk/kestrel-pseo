@@ -60,6 +60,8 @@ The automation follows an operational principle I use in SEO engineering: **catc
 
 ## Reproduce the working demo
 
+**New:** [Run a private 500-page programmatic SEO scale test](docs/SCALE_TEST_500.md). This produces 500 fictional HTML pages and a real technical QA report offline. The extra pages are never deployed to the public website.
+
 **Requirements:** Python 3.10 or later and Git. The core build and audit use the Python standard library.
 
 ~~~bash
