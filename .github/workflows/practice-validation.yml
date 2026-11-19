@@ -1,0 +1,66 @@
+name: Practice | Automatic pSEO validation
+
+on:
+  push:
+    branches:
+      - practice/amplify-interview-2026-11-19
+    paths:
+      - 'data/pages.csv'
+      - 'pseo_checker.py'
+      - 'build.py'
+      - 'qa.py'
+      - 'seo_ops/**'
+      - 'site_assets/**'
+      - '.github/workflows/practice-validation.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-and-build:
+    name: Validate CSV, test and build safely
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Validate programme data
+        run: python pseo_checker.py data/pages.csv
+
+      - name: Run automated SEO Ops tests
+        run: python -m unittest discover -s seo_ops/tests -v
+
+      - name: Build demo locally without deployment
+        run: |
+          python build.py \
+            --base-url https://graceomolola001-cmyk.github.io/kestrel-pseo/
+
+      - name: Verify generated HTML
+        run: python qa.py dist
+
+      - name: Audit generated SEO output
+        run: |
+          python -m seo_ops.cli audit-dir dist \
+            --base-url https://graceomolola001-cmyk.github.io/kestrel-pseo/ \
+            --out dist/seo-health.json \
+            --html dist/seo-health.html \
+            --strict
+
+      - name: Preserve practice audit report
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: practice-seo-audit
+          path: |
+            dist/seo-health.json
+            dist/seo-health.html
+
+      - name: Flag failed validation or build
+        if: failure()
+        run: |
+          echo "::error title=Kestrel practice pipeline blocked::Inspect the first failed step in this GitHub Actions run. No deployment was attempted."
