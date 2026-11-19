@@ -92,7 +92,7 @@ def head(title, desc, canonical, noindex):
 <title>{esc(title)}</title>
 <meta name="description" content="{esc(desc)}">
 <meta name="robots" content="{robots}">
-<link rel="alternate" href="{esc(canonical)}">
+<link rel="canonical" href="{esc(canonical)}">
 {verification_tag}
 {analytics_tag}
 <link rel="stylesheet" href="{PREFIX}/assets/site.css">
