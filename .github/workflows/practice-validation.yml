@@ -25,36 +25,52 @@ jobs:
         id: dataset
         run: |
           set -o pipefail
-          python pseo_checker.py data/pages.csv 2>&1 | tee validation-output.txt
+          mkdir -p reports/ci
+          python pseo_checker.py data/pages.csv 2>&1 | tee reports/ci/dataset.log
 
       - name: Run automated SEO Ops tests
         id: tests
-        run: python -m unittest discover -s seo_ops/tests -v
+        run: |
+          set -o pipefail
+          mkdir -p reports/ci
+          python -m unittest discover -s seo_ops/tests -v 2>&1 | tee reports/ci/tests.log
 
       - name: Verify interactive JavaScript syntax
         id: js
-        run: node --check site_assets/site.js
+        run: |
+          set -o pipefail
+          mkdir -p reports/ci
+          node --check site_assets/site.js 2>&1 | tee reports/ci/js.log
 
       - name: Build demo locally without deployment
         id: build
         run: |
+          set -o pipefail
+          mkdir -p reports/ci
           python build.py \
-            --base-url https://graceomolola001-cmyk.github.io/kestrel-pseo/
+            --base-url https://graceomolola001-cmyk.github.io/kestrel-pseo/ \
+            2>&1 | tee reports/ci/build.log
 
       - name: Verify generated HTML
         id: qa
-        run: python qa.py dist
+        run: |
+          set -o pipefail
+          mkdir -p reports/ci
+          python qa.py dist 2>&1 | tee reports/ci/qa.log
 
       - name: Audit generated SEO output
         id: audit
         run: |
+          set -o pipefail
+          mkdir -p reports/ci
           python -m seo_ops.cli audit-dir dist \
             --base-url https://graceomolola001-cmyk.github.io/kestrel-pseo/ \
             --out dist/seo-health.json \
             --html dist/seo-health.html \
-            --strict
+            --strict 2>&1 | tee reports/ci/audit.log
 
-      - name: Preserve practice audit report
+      - name: Preserve successful practice audit
+        id: audit_artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
@@ -62,8 +78,21 @@ jobs:
           path: |
             dist/seo-health.json
             dist/seo-health.html
+          if-no-files-found: error
+
+      - name: Preserve all available diagnostic logs
+        id: diagnostics
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: practice-ci-diagnostics
+          path: reports/ci/
+          if-no-files-found: warn
+          retention-days: 14
 
       - name: Notify main Kestrel n8n with CI status and audit
+        id: notify
         if: always()
         env:
           N8N_WEBHOOK_URL: ${{ secrets.KESTREL_N8N_CI_WEBHOOK_URL }}
@@ -71,35 +100,62 @@ jobs:
           BRANCH: ${{ github.ref_name }}
           COMMIT: ${{ github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          RUN_ATTEMPT: ${{ github.run_attempt }}
           STEP_DATASET: ${{ steps.dataset.outcome }}
           STEP_TESTS: ${{ steps.tests.outcome }}
           STEP_JS: ${{ steps.js.outcome }}
           STEP_BUILD: ${{ steps.build.outcome }}
           STEP_QA: ${{ steps.qa.outcome }}
           STEP_AUDIT: ${{ steps.audit.outcome }}
+          STEP_AUDIT_ARTIFACT: ${{ steps.audit_artifact.outcome }}
         run: |
           if [ -z "$N8N_WEBHOOK_URL" ]; then
-            echo "::warning title=n8n webhook missing::Add KESTREL_N8N_CI_WEBHOOK_URL as a GitHub Actions repository secret to enable n8n email alerts."
-            exit 0
+            echo "::error title=n8n alert delivery not configured::KESTREL_N8N_CI_WEBHOOK_URL repository secret is missing. GitHub Actions run is marked failed to avoid silent notification loss."
+            exit 1
           fi
 
           python - <<'PY'
           import json
           import os
+          import re
           from pathlib import Path
 
           steps = [
-              ("Validate programme data", os.getenv("STEP_DATASET", "")),
-              ("Run automated SEO Ops tests", os.getenv("STEP_TESTS", "")),
-              ("Verify interactive JavaScript syntax", os.getenv("STEP_JS", "")),
-              ("Build demo locally without deployment", os.getenv("STEP_BUILD", "")),
-              ("Verify generated HTML", os.getenv("STEP_QA", "")),
-              ("Audit generated SEO output", os.getenv("STEP_AUDIT", "")),
+              ("Validate programme data", "dataset", "reports/ci/dataset.log"),
+              ("Run automated SEO Ops tests", "tests", "reports/ci/tests.log"),
+              ("Verify interactive JavaScript syntax", "js", "reports/ci/js.log"),
+              ("Build demo locally without deployment", "build", "reports/ci/build.log"),
+              ("Verify generated HTML", "qa", "reports/ci/qa.log"),
+              ("Audit generated SEO output", "audit", "reports/ci/audit.log"),
+              ("Preserve successful practice audit", "audit_artifact", ""),
           ]
-          passed = all(result == "success" for _, result in steps)
-          failed_step = next((name for name, result in steps if result == "failure"), "Pipeline incomplete")
-          details_path = Path("validation-output.txt")
-          details = details_path.read_text(encoding="utf-8", errors="replace")[-2400:] if details_path.exists() else ""
+          outcomes = [(name, os.getenv("STEP_" + key.upper(), "")) for name, key, _ in steps]
+          passed = all(status == "success" for _, status in outcomes)
+          first_failed = next(((name, key, logfile) for name, key, logfile in steps
+                               if os.getenv("STEP_" + key.upper(), "") == "failure"), None)
+          review_items = []
+          validator_log = Path("reports/ci/dataset.log")
+          qa_log = Path("reports/ci/qa.log")
+          for path, prefix, pattern in [
+              (validator_log, "DATA REVIEW", r"^REVIEW\s+"),
+              (qa_log, "HTML QA WARNING", r"^WARN\s+"),
+          ]:
+              if path.is_file():
+                  for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+                      if re.match(pattern, line):
+                          review_items.append(prefix + ": " + line.strip())
+
+          failure_details = ""
+          if not passed and first_failed:
+              name, key, logfile = first_failed
+              if logfile and Path(logfile).is_file():
+                  failure_details = Path(logfile).read_text(encoding="utf-8", errors="replace")[-3300:]
+              else:
+                  failure_details = "GitHub Actions step failed; inspect the run link."
+              failure_details = "Failed step: " + name + "\n" + failure_details
+          elif not passed:
+              failure_details = "One or more expected checks did not complete. Inspect GitHub Actions."
+
           payload = {
               "event": "kestrel.practice.ci",
               "status": "success" if passed else "failure",
@@ -107,28 +163,42 @@ jobs:
               "branch": os.environ["BRANCH"],
               "commit": os.environ["COMMIT"],
               "run_url": os.environ["RUN_URL"],
-              "failed_step": "" if passed else failed_step,
-              "failure_details": "" if passed else details,
+              "run_attempt": os.environ["RUN_ATTEMPT"],
+              "step_outcomes": {name: status for name, status in outcomes},
+              "failed_step": first_failed[0] if first_failed else ("Pipeline incomplete" if not passed else ""),
+              "failure_details": failure_details,
+              "review_count": len(review_items),
+              "review_items": review_items[:10],
               "audit": None,
           }
           if passed:
-              report_path = Path("dist/seo-health.json")
-              if report_path.exists():
-                  payload["audit"] = json.loads(report_path.read_text(encoding="utf-8"))
+              audit_path = Path("dist/seo-health.json")
+              if audit_path.is_file():
+                  try:
+                      payload["audit"] = json.loads(audit_path.read_text(encoding="utf-8"))
+                  except (ValueError, OSError) as exc:
+                      payload["status"] = "failure"
+                      payload["failed_step"] = "Parse generated SEO audit"
+                      payload["failure_details"] = str(exc)
               else:
                   payload["status"] = "failure"
-                  payload["failed_step"] = "Audit file missing after passing checks"
+                  payload["failed_step"] = "Generated audit missing"
                   payload["failure_details"] = "Expected dist/seo-health.json was not produced"
-          Path("ci-event.json").write_text(json.dumps(payload), encoding="utf-8")
-          print("Sending", payload["status"], "event to the main Kestrel n8n workflow")
+
+          Path("ci-event.json").write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+          print("GitHub CI result:", payload["status"], "| source review warnings:", len(review_items))
+          if not passed:
+              print("First failed check:", payload["failed_step"])
           PY
 
+          echo "Sending CI event to the Kestrel Health n8n webhook."
           curl --fail --silent --show-error --retry 2 \
             --connect-timeout 10 --max-time 25 \
             -X POST -H 'Content-Type: application/json' \
             --data-binary @ci-event.json "$N8N_WEBHOOK_URL"
+          echo "Webhook accepted the CI event at HTTP level; confirm final delivery in n8n executions."
 
-      - name: Flag failed validation or build
+      - name: Surface blocked release or notification failure
         if: failure()
         run: |
-          echo "::error title=Kestrel practice pipeline blocked::Inspect the first failed step. No production deployment was attempted."
+          echo "::error title=Kestrel practice pipeline needs attention::Validation/build or notification delivery failed. Read the logs and check the n8n execution. No production deployment was attempted."
