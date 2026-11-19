@@ -4,14 +4,6 @@ on:
   push:
     branches:
       - practice/amplify-interview-2026-11-19
-    paths:
-      - 'data/pages.csv'
-      - 'pseo_checker.py'
-      - 'build.py'
-      - 'qa.py'
-      - 'seo_ops/**'
-      - 'site_assets/**'
-      - '.github/workflows/practice-validation.yml'
   workflow_dispatch:
 
 permissions:
