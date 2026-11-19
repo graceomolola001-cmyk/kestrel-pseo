@@ -1,4 +1,4 @@
-name: Practice | Automatic pSEO validation
+name: Practice | Automatic pSEO validation -> main n8n
 
 on:
   push:
@@ -19,7 +19,7 @@ permissions:
 
 jobs:
   validate-and-build:
-    name: Validate CSV, test and build safely
+    name: Validate, build and notify main n8n
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -30,20 +30,31 @@ jobs:
           python-version: '3.12'
 
       - name: Validate programme data
-        run: python pseo_checker.py data/pages.csv
+        id: dataset
+        run: |
+          set -o pipefail
+          python pseo_checker.py data/pages.csv 2>&1 | tee validation-output.txt
 
       - name: Run automated SEO Ops tests
+        id: tests
         run: python -m unittest discover -s seo_ops/tests -v
 
+      - name: Verify interactive JavaScript syntax
+        id: js
+        run: node --check site_assets/site.js
+
       - name: Build demo locally without deployment
+        id: build
         run: |
           python build.py \
             --base-url https://graceomolola001-cmyk.github.io/kestrel-pseo/
 
       - name: Verify generated HTML
+        id: qa
         run: python qa.py dist
 
       - name: Audit generated SEO output
+        id: audit
         run: |
           python -m seo_ops.cli audit-dir dist \
             --base-url https://graceomolola001-cmyk.github.io/kestrel-pseo/ \
@@ -60,7 +71,72 @@ jobs:
             dist/seo-health.json
             dist/seo-health.html
 
+      - name: Notify main Kestrel n8n with CI status and audit
+        if: always()
+        env:
+          N8N_WEBHOOK_URL: ${{ secrets.KESTREL_N8N_CI_WEBHOOK_URL }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          STEP_DATASET: ${{ steps.dataset.outcome }}
+          STEP_TESTS: ${{ steps.tests.outcome }}
+          STEP_JS: ${{ steps.js.outcome }}
+          STEP_BUILD: ${{ steps.build.outcome }}
+          STEP_QA: ${{ steps.qa.outcome }}
+          STEP_AUDIT: ${{ steps.audit.outcome }}
+        run: |
+          if [ -z "$N8N_WEBHOOK_URL" ]; then
+            echo "::warning title=n8n webhook missing::Add KESTREL_N8N_CI_WEBHOOK_URL as a GitHub Actions repository secret to enable n8n email alerts."
+            exit 0
+          fi
+
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          steps = [
+              ("Validate programme data", os.getenv("STEP_DATASET", "")),
+              ("Run automated SEO Ops tests", os.getenv("STEP_TESTS", "")),
+              ("Verify interactive JavaScript syntax", os.getenv("STEP_JS", "")),
+              ("Build demo locally without deployment", os.getenv("STEP_BUILD", "")),
+              ("Verify generated HTML", os.getenv("STEP_QA", "")),
+              ("Audit generated SEO output", os.getenv("STEP_AUDIT", "")),
+          ]
+          passed = all(result == "success" for _, result in steps)
+          failed_step = next((name for name, result in steps if result == "failure"), "Pipeline incomplete")
+          details_path = Path("validation-output.txt")
+          details = details_path.read_text(encoding="utf-8", errors="replace")[-2400:] if details_path.exists() else ""
+          payload = {
+              "event": "kestrel.practice.ci",
+              "status": "success" if passed else "failure",
+              "repository": os.environ["REPOSITORY"],
+              "branch": os.environ["BRANCH"],
+              "commit": os.environ["COMMIT"],
+              "run_url": os.environ["RUN_URL"],
+              "failed_step": "" if passed else failed_step,
+              "failure_details": "" if passed else details,
+              "audit": None,
+          }
+          if passed:
+              report_path = Path("dist/seo-health.json")
+              if report_path.exists():
+                  payload["audit"] = json.loads(report_path.read_text(encoding="utf-8"))
+              else:
+                  payload["status"] = "failure"
+                  payload["failed_step"] = "Audit file missing after passing checks"
+                  payload["failure_details"] = "Expected dist/seo-health.json was not produced"
+          Path("ci-event.json").write_text(json.dumps(payload), encoding="utf-8")
+          print("Sending", payload["status"], "event to the main Kestrel n8n workflow")
+          PY
+
+          curl --fail --silent --show-error --retry 2 \
+            --connect-timeout 10 --max-time 25 \
+            -X POST -H 'Content-Type: application/json' \
+            --data-binary @ci-event.json "$N8N_WEBHOOK_URL"
+
       - name: Flag failed validation or build
         if: failure()
         run: |
-          echo "::error title=Kestrel practice pipeline blocked::Inspect the first failed step in this GitHub Actions run. No deployment was attempted."
+          echo "::error title=Kestrel practice pipeline blocked::Inspect the first failed step. No production deployment was attempted."
