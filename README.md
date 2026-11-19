@@ -108,3 +108,5 @@ I work at the intersection of **SEO strategy, technical implementation, analytic
 My wider work includes SEO content strategy, GA4/GTM conversion measurement, Google Apps Script, Python, workflow automation with n8n/Make, and programmatic content systems.
 
 **[Explore my portfolio](https://grace-portfolio-1sw.pages.dev/)** · **[View the full SEO automation implementation](seo_ops/README.md)**
+
+Interview CI baseline test
