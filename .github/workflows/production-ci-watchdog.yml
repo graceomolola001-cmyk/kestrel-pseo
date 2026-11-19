@@ -1,0 +1,90 @@
+name: Production CI | Independent failure watcher
+
+on:
+  workflow_run:
+    workflows:
+      - Check, build and deploy
+    types:
+      - completed
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  report-production-failure:
+    if: >-
+      ${{ github.event.workflow_run.head_branch == 'main' &&
+          (github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'workflow_dispatch') &&
+          github.event.workflow_run.conclusion != 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Report production CI/deployment failure to n8n
+        env:
+          N8N_WEBHOOK_URL: ${{ secrets.KESTREL_N8N_CI_WEBHOOK_URL }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -z "$N8N_WEBHOOK_URL" ]; then
+            echo "::error title=Production alert delivery missing::KESTREL_N8N_CI_WEBHOOK_URL secret must be configured."
+            exit 1
+          fi
+
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          from urllib.request import Request, urlopen
+
+          event = json.loads(Path(os.environ["GITHUB_EVENT_PATH"]).read_text(encoding="utf-8"))
+          failed = event["workflow_run"]
+          repository = os.environ["GITHUB_REPOSITORY"]
+          failed_step = "Production build or deployment"
+          diagnostics = "Workflow conclusion: " + str(failed.get("conclusion", "unknown"))
+          try:
+              url = f"https://api.github.com/repos/{repository}/actions/runs/{failed['id']}/jobs?per_page=100"
+              req = Request(url, headers={
+                  "Accept": "application/vnd.github+json",
+                  "Authorization": "Bearer " + os.environ["GITHUB_TOKEN"],
+                  "User-Agent": "Kestrel-Production-Watchdog",
+              })
+              with urlopen(req, timeout=15) as response:
+                  jobs = json.load(response).get("jobs", [])
+              for job in jobs:
+                  if job.get("conclusion") in ("failure", "cancelled", "timed_out", "action_required"):
+                      failed_step = job.get("name") or failed_step
+                      bad_steps = [
+                          s.get("name", "Unnamed step") for s in job.get("steps", [])
+                          if s.get("conclusion") in ("failure", "cancelled", "timed_out")
+                      ]
+                      diagnostics += "\nFailed job: " + failed_step
+                      if bad_steps:
+                          diagnostics += "\nFailed step(s): " + "; ".join(bad_steps)
+                      diagnostics += "\nInspect the original workflow run for error logs."
+                      break
+          except Exception as exc:
+              diagnostics += "\nCould not retrieve job details: " + str(exc)
+
+          payload = {
+              "event": "kestrel.production.ci",
+              "status": "failure",
+              "repository": repository,
+              "branch": "main",
+              "commit": failed.get("head_sha") or "",
+              "run_url": failed.get("html_url") or "",
+              "run_attempt": str(failed.get("run_attempt") or 1),
+              "failed_step": failed_step,
+              "failure_details": diagnostics,
+              "review_count": 0,
+              "review_items": [],
+              "audit": None,
+          }
+          Path("production-failure-event.json").write_text(json.dumps(payload), encoding="utf-8")
+          print("Detected unsuccessful production GitHub Actions run:", payload["run_url"])
+          PY
+
+          curl --fail --silent --show-error --retry 2 \
+            --connect-timeout 10 --max-time 35 \
+            -X POST -H 'Content-Type: application/json' \
+            --data-binary @production-failure-event.json "$N8N_WEBHOOK_URL"
+          echo "Production CI failure forwarded to n8n. Check execution and Gmail response."
